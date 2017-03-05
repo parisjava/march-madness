@@ -1,5 +1,10 @@
+#Load packages
+library(dplyr)
+library(neuralnet)
+library(randomForest)
+
 #Set working directory
-#setwd("Documents/School/Spring17/March madness machine learning")
+#setwd("your working directory")
 
 #Load data
 reg = read.csv("RegularSeasonDetailedResults.csv")
