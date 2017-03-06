@@ -52,7 +52,14 @@ reg[["Lstlblk"]] = with(reg,Lstl+Lblk)
 reg[["Wdiff"]] = with(reg,Wscore-Lscore)
 reg[["Ldiff"]] = with(reg,Lscore-Wscore)
 
+#Reorganize data
+ptdiff.w = reg %>% 
+  select(Season, Diff = Wdiff, ReboundPct = WReboundPct, PctofShots3pt = WPctofShots3pt, Pct3p = W3pPct, PtsPerFGA = WPtsPerFGA, AstTurnRatio = WAstTurnRatio, StlBlk = Wstlblk, ORB = Wor)
+ptdiff.l = reg %>% 
+  select(Season, Diff = Ldiff, ReboundPct = LReboundPct, PctofShots3pt = LPctofShots3pt, Pct3p = L3pPct, PtsPerFGA = LPtsPerFGA, AstTurnRatio = LAstTurnRatio, StlBlk = Lstlblk, ORB = Lor)
 
+ptdiff = rbind(ptdiff.w, ptdiff.l)
+ptdiff.r = filter(ptdiff,Season>=2014)
 
 #Plot relations between stats and point differential
 rel = ggplot() + 
