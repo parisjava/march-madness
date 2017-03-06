@@ -19,18 +19,25 @@ scrape <- function(url) {
   return(M)
 }
 
+home <- "https://www.teamrankings.com/ncb/stats/"
+links <- read_html(home)%>%html_nodes('a')%>%html_attrs()
+links <- unlist(links)
+links <- links[grep("ncaa-basketball/stat",links,perl=TRUE,value=FALSE)]
+links <- paste0("https://www.teamrankings.com",links)
 
-# To update: add more years or stats
-start = "https://www.teamrankings.com/ncaa-basketball/stat/"
-stats = c("points-per-game","average-scoring-margin")
 years = c("2017","2016","2015","2014","2013")
-combinations <- as.vector(outer(stats,years,paste,sep="?date="))
+combinations <- as.vector(outer(links,years,paste,sep="?date="))
 urls <- paste0(start,combinations,"-05-01") #May 1 is after season end, so gets full season stats
 vnames <- gsub("-","_",combinations) # replace all '-' in combinations with '_'
 
+get.filename.to.write <- function (url) {
+  print(url)
+  f <- sub("/ncaa_basketball/stat/","",url)
+  f <- sub("?date","_",f)
+  f
+}
+
 for (i in 1:length(urls)) {
-  # assign creates a variable with name as the string passed in as its first parameter
-  # and value passed in as second parameter.
-  # For example, assign("x",5) yields variable called x with value 5
-  assign(vnames[i],scrape(urls[i]))
+  M <- scrape(urls[i])
+  write.csv(M, file = "")
 }
