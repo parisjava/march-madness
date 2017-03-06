@@ -101,7 +101,7 @@ ptdiff.l = reg %>%
          OppAstTurnRatio = WAstTurnRatio, OppStlBlk = Wstlblk)
 
 ptdiff = rbind(ptdiff.w, ptdiff.l)
-ptdiff.r = filter(ptdiff,Season>=2014)
+ptdiff.r = filter(ptdiff,Season>=2014) #Only recent data
 
 #Plot relations between stats and point differential
 rel = ggplot() + 
