@@ -13,6 +13,18 @@ library(randomForest) #You may need to install this
 #Set working directory
 #setwd("your working directory")
 
+#Define functions
+lloc = function(wloc) {
+  if (wloc == "N") {
+    l="N"
+  } else if (wloc == "H") {
+    l="A"
+  } else {
+    l="H"
+  }
+  return(l)
+}
+
 #Load data
 reg = read.csv("RegularSeasonDetailedResults.csv")
 sample = read.csv("sample_submission.csv")
@@ -52,11 +64,41 @@ reg[["Lstlblk"]] = with(reg,Lstl+Lblk)
 reg[["Wdiff"]] = with(reg,Wscore-Lscore)
 reg[["Ldiff"]] = with(reg,Lscore-Wscore)
 
+reg[["Lloc"]] = lapply(reg[["Wloc"]], lloc)
+
+reg[["Wwin"]] = 1
+reg[["Lwin"]] = 0
+
+reg[["Wreb"]] = with(reg,Wor+Wdr)
+reg[["Lreb"]] = with(reg,Lor+Ldr)
+
 #Reorganize data
 ptdiff.w = reg %>% 
-  select(Season, Diff = Wdiff, ReboundPct = WReboundPct, PctofShots3pt = WPctofShots3pt, Pct3p = W3pPct, PtsPerFGA = WPtsPerFGA, AstTurnRatio = WAstTurnRatio, StlBlk = Wstlblk, ORB = Wor)
+  select(Season, Team = Wteam, Opp = Lteam, Daynum, Loc = Wloc, OT = Numot,
+         Diff = Wdiff, W = Wwin, Score = Wscore, OppScore = Lscore,
+         FGM = Wfgm, FGA = Wfga, FGM3 = Wfgm3, FGA3 = Wfga3, FTM = Wftm, FTA = Wfta,
+         Reb = Wreb, OReb = Wor, DReb = Wdr, Assists = Wast, Turnovers = Wto, 
+         Steals = Wstl, Blocks = Wblk, Fouls = Wpf,
+         ReboundPct = WReboundPct, PctofShots3pt = WPctofShots3pt, Pct3p = W3pPct, PtsPerFGA = WPtsPerFGA, 
+         AstTurnRatio = WAstTurnRatio, StlBlk = Wstlblk,
+         OppFGM = Lfgm, OppFGA = Lfga, OppFGM3 = Lfgm3, OppFGA3 = Lfga3, OppFTM = Lftm, OppFTA = Lfta, 
+         OppReb = Lreb, OppOReb = Lor, OppDReb = Ldr, OppAssists = Last, OppTurnovers = Lto, 
+         OppSteals = Lstl, OppBlocks = Lblk, OppFouls = Lpf,
+         OppReboundPct = LReboundPct, OppPctofShots3pt = LPctofShots3pt, OppPct3p = L3pPct, OppPtsPerFGA = LPtsPerFGA, 
+         OppAstTurnRatio = LAstTurnRatio, OppStlBlk = Lstlblk)
 ptdiff.l = reg %>% 
-  select(Season, Diff = Ldiff, ReboundPct = LReboundPct, PctofShots3pt = LPctofShots3pt, Pct3p = L3pPct, PtsPerFGA = LPtsPerFGA, AstTurnRatio = LAstTurnRatio, StlBlk = Lstlblk, ORB = Lor)
+  select(Season, Team = Lteam, Opp = Wteam, Daynum, Loc = Lloc, OT = Numot,
+         Diff = Ldiff, W = Lwin, Score = Lscore, OppScore = Wscore,
+         FGM = Lfgm, FGA = Lfga, FGM3 = Lfgm3, FGA3 = Lfga3, FTM = Lftm, FTA = Lfta,
+         Reb = Lreb, OReb = Lor, DReb = Ldr, Assists = Last, Turnovers = Lto, 
+         Steals = Lstl, Blocks = Lblk, Fouls = Lpf,
+         ReboundPct = LReboundPct, PctofShots3pt = LPctofShots3pt, Pct3p = L3pPct, PtsPerFGA = LPtsPerFGA, 
+         AstTurnRatio = LAstTurnRatio, StlBlk = Lstlblk,
+         OppFGM = Wfgm, OppFGA = Wfga, OppFGM3 = Wfgm3, OppFGA3 = Wfga3, OppFTM = Wftm, OppFTA = Wfta, 
+         OppReb = Wreb, OppOReb = Wor, OppDReb = Wdr, OppAssists = Wast, OppTurnovers = Wto, 
+         OppSteals = Wstl, OppBlocks = Wblk, OppFouls = Wpf,
+         OppReboundPct = WReboundPct, OppPctofShots3pt = WPctofShots3pt, OppPct3p = W3pPct, OppPtsPerFGA = WPtsPerFGA, 
+         OppAstTurnRatio = WAstTurnRatio, OppStlBlk = Wstlblk)
 
 ptdiff = rbind(ptdiff.w, ptdiff.l)
 ptdiff.r = filter(ptdiff,Season>=2014)
