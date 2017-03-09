@@ -35,6 +35,10 @@ combinations <- as.vector(outer(links,years,paste,sep="?date="))
 urls <- paste0(combinations,"-05-01") #May 1 is after season end, so gets full season stats
 vnames <- gsub("-","_",combinations) # replace all '-' in combinations with '_'
 
+# This function gives a readable, understandable name for an output data file given
+# some url.
+# Ex: url "https://www.teamrankings.com/ncaa-basketball/stat/points-per-game?date=2017-05-01"
+# will give filename "points_per_game_2017.csv"
 get.filename.to.write <- function (url) {
   start <- unlist(gregexpr(pattern ='/stat/',url)) + 6 # +6 for / s t a t /
   question.mark <- unlist(gregexpr(pattern = '\\?',url))
@@ -44,6 +48,8 @@ get.filename.to.write <- function (url) {
   return(paste0(stat,"_",year,".csv"))
 }
 
+# For each url that we have discovered, get the appropriate file name, scrape the webpage,
+# and print the scrape results to the file
 for (i in 1:length(urls)) {
   file.name <- get.filename.to.write(urls[i])
   print(file.name)
