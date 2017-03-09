@@ -1,3 +1,6 @@
+library(magrittr) # to use %>% operator
+library(rvest)    # for web scraping
+
 ###
 # scrape is a function that creates a data frame corresponding to
 # the table on a webpage. Has been tested only with pages from teamrankings.com
@@ -19,6 +22,8 @@ scrape <- function(url) {
   return(M)
 }
 
+# read from the "home page" of Stats on this website, and get the urls of all
+# pages pertaining to a certain stat
 home <- "https://www.teamrankings.com/ncb/stats/"
 links <- read_html(home)%>%html_nodes('a')%>%html_attrs()
 links <- unlist(links)
@@ -27,17 +32,21 @@ links <- paste0("https://www.teamrankings.com",links)
 
 years = c("2017","2016","2015","2014","2013")
 combinations <- as.vector(outer(links,years,paste,sep="?date="))
-urls <- paste0(start,combinations,"-05-01") #May 1 is after season end, so gets full season stats
+urls <- paste0(combinations,"-05-01") #May 1 is after season end, so gets full season stats
 vnames <- gsub("-","_",combinations) # replace all '-' in combinations with '_'
 
 get.filename.to.write <- function (url) {
-  print(url)
-  f <- sub("/ncaa_basketball/stat/","",url)
-  f <- sub("?date","_",f)
-  f
+  start <- unlist(gregexpr(pattern ='/stat/',url)) + 6 # +6 for / s t a t /
+  question.mark <- unlist(gregexpr(pattern = '\\?',url))
+  stat <- substr(url,start,question.mark - 1) 
+  stat <- gsub("-","_",stat) # replace '-' with '_'
+  year <- substr(url,question.mark + 6, question.mark + 9)
+  return(paste0(stat,"_",year,".csv"))
 }
 
 for (i in 1:length(urls)) {
+  file.name <- get.filename.to.write(urls[i])
+  print(file.name)
   M <- scrape(urls[i])
-  write.csv(M, file = "")
+  write.csv(M, file.name)
 }
